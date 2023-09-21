@@ -3,6 +3,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# data
+*.zip
+artist20/
+
 # C extensions
 *.so
 
