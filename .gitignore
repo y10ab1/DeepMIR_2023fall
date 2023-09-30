@@ -6,6 +6,7 @@ __pycache__/
 # data
 *.zip
 artist20/
+OPENAI_KEY*
 
 # C extensions
 *.so
