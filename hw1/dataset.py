@@ -45,7 +45,8 @@ class AudioDataset(Dataset):
                 
         # encode labels
         self.label_encoder = {label: i for i, label in enumerate(sorted(set(self.labels)))}
-        # print(f'Classes: {self.label_encoder}')
+        self.label_decoder = {v: k for k, v in self.label_encoder.items()}
+        print(f'Classes: {self.label_encoder}')
     def __len__(self):
         return len(self.audio_files)
 
@@ -90,7 +91,9 @@ class AudioDataset(Dataset):
         return signal.squeeze(0), torch.tensor(self.label_encoder[label])
     
     def get_label(self, idx):
-        return self.labels[idx]
+        if isinstance(idx, torch.Tensor):
+            idx = idx.item()
+        return self.label_decoder[idx]
     
 if __name__ == '__main__':
     print(f'torchaudio backend: {torchaudio.get_audio_backend()}')

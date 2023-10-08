@@ -41,11 +41,12 @@ def main(args):
             # print(f'Epoch: {epoch}, Batch: {batch_idx}, Loss: {loss.item()}')
             logger.set_description(f'Epoch: {epoch}, Batch: {batch_idx}, Loss: {loss.item()}')
             
-        scheduler.step(loss)            
         
         # In your main function:
-        accuracy = validate(model, val_dataloader, model.device)
-        print(f'Epoch: {epoch}, Accuracy: {accuracy}')
+        accuracy, val_loss = validate(model, val_dataloader, model.device)
+        print(f'Epoch: {epoch}, Accuracy: {accuracy}, val_loss: {val_loss}')
+        
+        scheduler.step(val_loss)
         
         # save model every 5 epochs
         if epoch % 5 == 0:
@@ -54,7 +55,7 @@ def main(args):
                 'epoch': epoch,
                 'model_state_dict': model.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
-                'loss': loss,
+                'val_loss': val_loss,
             }, f'./model/model_{epoch}.pth')
 
             
@@ -65,8 +66,7 @@ def main(args):
                 'epoch': epoch,
                 'model_state_dict': model.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
-                'loss': loss,
-                # ... any other state information ...
+                'val_loss': val_loss,
             }, f'./model/model_best.pth')
 
             print(f'Save best model with accuracy: {best_acc}')
@@ -75,13 +75,15 @@ def validate(model, dataloader, device):
     model.eval()
     correct = 0
     total = 0
+    loss = float('inf')
     with torch.no_grad():
         for data, target in tqdm(dataloader):
             output = model(data.to(device))
             predicted = torch.argmax(output.squeeze(1), dim=1)
             total += target.size(0)
             correct += (predicted == target.to(device)).sum().item()
-    return correct / total
+            loss = min(loss, F.cross_entropy(output.squeeze(1), target.to(device)).item())
+    return correct / total, loss
 
 def custom_collate(batch):
     data, target = zip(*batch)
