@@ -13,6 +13,8 @@ ref_signal_2, sr_2 = torchaudio.load(INPUT_SPEECH_2)
 # resample
 ref_signal_1 = torchaudio.transforms.Resample(sr_1, 16000)(ref_signal_1).mean(0, keepdim=True)
 ref_signal_2 = torchaudio.transforms.Resample(sr_2, 16000)(ref_signal_2).mean(0, keepdim=True)
+
+print(ref_signal_1.shape, ref_signal_2.shape, 'before')
     
 spk_embedding_1 = spk_emb_encoder.encode_batch(ref_signal_1.to("cuda"))
 spk_embedding_2 = spk_emb_encoder.encode_batch(ref_signal_2.to("cuda"))

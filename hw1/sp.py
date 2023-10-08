@@ -1,6 +1,7 @@
 import torchaudio
 from speechbrain.pretrained import SpeakerRecognition
 verification = SpeakerRecognition.from_hparams(source="speechbrain/spkrec-ecapa-voxceleb", savedir="pretrained_models/spkrec-ecapa-voxceleb", run_opts={"device":"cuda"})
+print(verification.hparams)
 # score, prediction = verification.verify_files("speechbrain/spkrec-ecapa-voxceleb/example1.wav", "speechbrain/spkrec-ecapa-voxceleb/example2.flac")
 score, prediction = verification.verify_files("artist20/train_seperated/aerosmith/Aerosmith/mdx_extra/01-Make_It/vocals.mp3", 
                                               "artist20/train_seperated/aerosmith/Aerosmith/mdx_extra/02-Somebody/vocals.mp3",
@@ -22,3 +23,8 @@ score, prediction = verification.verify_files("artist20/train_seperated/aerosmit
 
 
 print(score, prediction)
+verification.expect_len = 20
+ret = verification.classify_file("artist20/train_seperated/aerosmith/Aerosmith/mdx_extra/01-Make_It/vocals.mp3")
+print(ret)
+ret = verification.classify_file("artist20/train_seperated/aerosmith/Aerosmith/mdx_extra/02-Somebody/vocals.mp3")
+print(ret)
