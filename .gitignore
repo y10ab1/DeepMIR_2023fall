@@ -8,6 +8,7 @@ __pycache__/
 artist20/
 OPENAI_KEY*
 separated/
+model/
 
 # C extensions
 *.so
