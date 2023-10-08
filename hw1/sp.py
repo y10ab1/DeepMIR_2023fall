@@ -1,11 +1,24 @@
-from speechbrain.pretrained import SepformerSeparation as separator
 import torchaudio
+from speechbrain.pretrained import SpeakerRecognition
+verification = SpeakerRecognition.from_hparams(source="speechbrain/spkrec-ecapa-voxceleb", savedir="pretrained_models/spkrec-ecapa-voxceleb", run_opts={"device":"cuda"})
+# score, prediction = verification.verify_files("speechbrain/spkrec-ecapa-voxceleb/example1.wav", "speechbrain/spkrec-ecapa-voxceleb/example2.flac")
+score, prediction = verification.verify_files("artist20/train_seperated/aerosmith/Aerosmith/mdx_extra/01-Make_It/vocals.mp3", 
+                                              "artist20/train_seperated/aerosmith/Aerosmith/mdx_extra/02-Somebody/vocals.mp3",
+                                              )
 
-model = separator.from_hparams(source="speechbrain/sepformer-wsj02mix", savedir='pretrained_models/sepformer-wsj02mix')#, run_opts={"device":"cuda:0"})
+# score, prediction = verification.verify_files("artist20/train_seperated/aerosmith/Aerosmith/mdx_extra/01-Make_It/vocals.mp3", 
+#                                               "artist20/train_seperated/cure/Disintegration/mdx_extra/03-Closedown/vocals.mp3",
+#                                               )
 
-# for custom file, change path
-est_sources = model.separate_file(path='/home/yuehpo/coding/DeepMIR_2023fall/hw1/artist20/train/radiohead/Pablo_Honey/09-Prove_Yourself.mp3') 
+# score, prediction = verification.verify_files("artist20/train_seperated/aerosmith/Aerosmith/mdx_extra/02-Somebody/vocals.mp3",
+#                                               "artist20/train_seperated/aerosmith/Aerosmith/mdx_extra/02-Somebody/vocals.mp3",
+#                                               )
 
-torchaudio.save("source1hat.wav", est_sources[:, :, 0].detach().cpu(), 8000)
-torchaudio.save("source2hat.wav", est_sources[:, :, 1].detach().cpu(), 8000)
+# score, prediction = verification.verify_files("artist20/train_seperated/aerosmith/Aerosmith/mdx_extra/02-Somebody/vocals.mp3",
+#                                               "artist20/train_seperated/aerosmith/Draw_the_Line/mdx_extra/01-Draw_the_Line/vocals.mp3",
+#                                               )
 
+
+
+
+print(score, prediction)
