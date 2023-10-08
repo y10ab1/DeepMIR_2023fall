@@ -21,7 +21,10 @@ for dir_path in dir_paths:
                 failed_list.append(filename)
                 
 # Print and save the list of failed files
-print(failed_list)
-with open("failed_list.txt", "w") as f:
-    for item in failed_list:
-        f.write("%s\n" % item)
+if len(failed_list) == 0:
+    print("No failed files")
+else:
+    print(failed_list)
+    with open("failed_list.txt", "w") as f:
+        for item in failed_list:
+            f.write("%s\n" % item)
