@@ -1,6 +1,8 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from torch.utils.tensorboard import SummaryWriter
+
 import argparse
 import os
 import torch.nn.functional as F
@@ -10,7 +12,12 @@ from dataset import AudioDataset
 from model import SingerClassifier
 
 def main(args):
-    model = SingerClassifier(num_classes=20)
+    writer = SummaryWriter(log_dir=f'{args.save_dir}/runs')
+    model_save_dir = f'{args.save_dir}/models'
+    os.makedirs(model_save_dir, exist_ok=True)  # Ensure the directory exists
+
+    
+    model = SingerClassifier(num_classes=20, linear_config=args.linear_config)
     dataset = AudioDataset(split='train', load_vocals=True, sample_rate=16000, trim_silence=args.trim_silence, do_augment=args.do_augment)
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers, pin_memory=True)
     
@@ -41,6 +48,9 @@ def main(args):
             # print(f'Epoch: {epoch}, Batch: {batch_idx}, Loss: {loss.item()}')
             logger.set_description(f'Epoch: {epoch}, Batch: {batch_idx}, Loss: {loss.item()}')
             
+            writer.add_scalar('Training Loss', loss.item(), epoch * len(dataloader) + batch_idx)
+
+            
         
         # In your main function:
         accuracy, val_loss = validate(model, val_dataloader, model.device)
@@ -48,18 +58,20 @@ def main(args):
         
         scheduler.step(val_loss)
         
-        # save model every 5 epochs
+        writer.add_scalar('Validation Accuracy', accuracy, epoch)
+        writer.add_scalar('Validation Loss', val_loss, epoch)
+    
+
+        # Save model every 5 epochs
         if epoch % 5 == 0:
-            os.makedirs('./model', exist_ok=True)
             torch.save({
                 'epoch': epoch,
                 'model_state_dict': model.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
                 'val_loss': val_loss,
-            }, f'./model/model_{epoch}.pth')
-
-            
-        # save best model
+            }, f'{model_save_dir}/model_{epoch}.pth')
+        
+        # Save best model
         if epoch == 1 or accuracy > best_acc:
             best_acc = accuracy
             torch.save({
@@ -67,9 +79,10 @@ def main(args):
                 'model_state_dict': model.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
                 'val_loss': val_loss,
-            }, f'./model/model_best.pth')
-
+            }, f'{model_save_dir}/model_best.pth')
             print(f'Save best model with accuracy: {best_acc}')
+            
+    writer.close()
 
 def validate(model, dataloader, device):
     model.eval()
@@ -114,6 +127,9 @@ if __name__ == '__main__':
                         help='resume from checkpoint (default: None), e.g. ./model/model_5.pth')
     parser.add_argument('--do_augment', type=bool, default=True, metavar='N',
                         help='do augment (default: False)')
-    
+    parser.add_argument('--save_dir', type=str, default='./model', metavar='N',
+                        help='save directory (default: ./model)')
+    parser.add_argument('--linear_config', type=int, default=[512], metavar='N', nargs='+',
+                        help='linear config (default: [512])')
     args = parser.parse_args()
     main(args)
