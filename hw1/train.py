@@ -1,11 +1,12 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.tensorboard import SummaryWriter
 
 import argparse
 import os
-import torch.nn.functional as F
+import json
 
 from tqdm import tqdm
 from dataset import AudioDataset
@@ -13,6 +14,13 @@ from model import SingerClassifier
 
 def main(args):
     writer = SummaryWriter(log_dir=f'{args.save_dir}/runs')
+    # Convert args to a dictionary and then to a JSON string
+    args_dict = vars(args)
+    args_json_str = json.dumps(args_dict, indent=2)
+    
+    # Log args to TensorBoard
+    writer.add_text('Arguments', args_json_str, 0)
+    
     model_save_dir = f'{args.save_dir}/models'
     os.makedirs(model_save_dir, exist_ok=True)  # Ensure the directory exists
 
