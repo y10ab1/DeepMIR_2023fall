@@ -39,16 +39,17 @@ These instructions will guide you on how to get the project up and running on yo
     The directory structure should look like this:
 
     ```
-    📂 artist20
-    ├── 📂 test
-    │   ├── 🎵 *.mp3
-    │   └── 🎵 *.wav
-    └── 📂 test_separated
-        └── 📂 {song_ids}
-            └── 📂 mdx_extra
-                └── 📂 {song_ids}
-                    ├── 🎵 vocals.mp3
-                    └── 🎵 no_vocals.mp3
+    📂 root
+    ├── 📂 artist20
+        ├── 📂 test
+        │   ├── 🎵 *.mp3
+        │   └── 🎵 *.wav
+        └── 📂 test_separated
+            └── 📂 {song_ids}
+                └── 📂 mdx_extra
+                    └── 📂 {song_ids}
+                        ├── 🎵 vocals.mp3
+                        └── 🎵 no_vocals.mp3
     ```
 
 
