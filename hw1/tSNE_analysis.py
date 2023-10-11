@@ -106,7 +106,7 @@ def main(args):
     legend_elements = [Line2D([0], [0], marker='o', color='w', label=f'{val_dataset.get_label(i)}',
                           markersize=10, markerfacecolor=plt.cm.tab20(i/20)) for i in range(20)]
     plt.legend(handles=legend_elements, loc='upper left', bbox_to_anchor=(1, 1))
-
+    plt.tight_layout()
     plt.savefig('tsne_pretrain.png')
     plt.clf()
 
@@ -119,6 +119,7 @@ def main(args):
     legend_elements = [Line2D([0], [0], marker='o', color='w', label=f'{val_dataset.get_label(i)}',
                           markersize=10, markerfacecolor=plt.cm.tab20(i/20)) for i in range(20)]
     plt.legend(handles=legend_elements, loc='upper left', bbox_to_anchor=(1, 1))
+    plt.tight_layout()
     plt.savefig('tsne_linear.png')
 
 
