@@ -19,9 +19,9 @@ with open("data_path/validation.txt", "r") as f:
         valid_path.append(line.strip().split(",")[0])
         
 # output dir for seperated vocals and accompaniment
-train_seperated = "artist20/train_seperated"
-valid_seperated = "artist20/valid_seperated"
-test_seperated = "artist20/test_seperated"
+train_separated = "artist20/train_separated"
+valid_separated = "artist20/valid_separated"
+test_separated = "artist20/test_separated"
 
 failed_list = []
 
@@ -30,9 +30,9 @@ failed_list = []
 # seperate vocals and accompaniment for train data
 for path in train_path:
     
-    # DeepMIR_2023fall/hw1/artist20/train_seperated/queen/A_Night_At_the_Opera/mdx_extra/01-Death_On_Two_Legs_Dedicated_To_
+    # DeepMIR_2023fall/hw1/artist20/train_separated/queen/A_Night_At_the_Opera/mdx_extra/01-Death_On_Two_Legs_Dedicated_To_
     # if the path has been seperated, skip it
-    if os.path.exists(os.path.join(train_seperated, path.split("/")[-3], path.split("/")[-2], 'mdx_extra', path.split("/")[-1].split(".")[0])):
+    if os.path.exists(os.path.join(train_separated, path.split("/")[-3], path.split("/")[-2], 'mdx_extra', path.split("/")[-1].split(".")[0])):
         print("skip", path)
         continue
     
@@ -43,7 +43,7 @@ for path in train_path:
     # get song name
     song = path.split("/")[-1].split(".")[0]
     # get output path
-    vocal_output = os.path.join(train_seperated, artist, album)
+    vocal_output = os.path.join(train_separated, artist, album)
     # create output dir
     os.makedirs(vocal_output, exist_ok=True)
     # get input path
@@ -66,7 +66,7 @@ for path in train_path:
 for path in valid_path:
     
     # if the path has been seperated, skip it
-    if os.path.exists(os.path.join(valid_seperated, path.split("/")[-3], path.split("/")[-2], 'mdx_extra', path.split("/")[-1].split(".")[0])):
+    if os.path.exists(os.path.join(valid_separated, path.split("/")[-3], path.split("/")[-2], 'mdx_extra', path.split("/")[-1].split(".")[0])):
         print("skip", path)
         continue
     
@@ -77,7 +77,7 @@ for path in valid_path:
     # get song name
     song = path.split("/")[-1].split(".")[0]
     # get output path
-    vocal_output = os.path.join(valid_seperated, artist, album)
+    vocal_output = os.path.join(valid_separated, artist, album)
     # create output dir
     os.makedirs(vocal_output, exist_ok=True)
     # get input path
@@ -98,13 +98,13 @@ for path in valid_path:
 for path in glob.glob("artist20/test/*"):
     
     # if the path has been seperated, skip it
-    if os.path.exists(os.path.join(test_seperated, path.split("/")[-1].split(".")[0], "mdx_extra")):
+    if os.path.exists(os.path.join(test_separated, path.split("/")[-1].split(".")[0], "mdx_extra")):
         print("skip", path)
         continue
     
     idx = path.split("/")[-1].split(".")[0]
     # get output path
-    vocal_output = os.path.join(test_seperated, idx)
+    vocal_output = os.path.join(test_separated, idx)
     # create output dir
     os.makedirs(vocal_output, exist_ok=True)
     # get input path

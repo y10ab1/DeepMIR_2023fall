@@ -18,7 +18,7 @@ class AudioDataset(Dataset):
         self.labels = []
         
         if self.split == 'train':
-            dirpath = 'artist20/train_seperated'
+            dirpath = 'artist20/train_separated'
             for path in glob.glob(f'{dirpath}/*/*/*/*'):
                 if self.load_vocals:
                     self.audio_files.append(f'{path}/vocals.mp3')
@@ -27,7 +27,7 @@ class AudioDataset(Dataset):
                 self.labels.append(path.split('/')[-4])
                 
         elif self.split == 'valid':
-            dirpath = 'artist20/valid_seperated'
+            dirpath = 'artist20/valid_separated'
             for path in glob.glob(f'{dirpath}/*/*/*/*'):
                 if self.load_vocals:
                     self.audio_files.append(f'{path}/vocals.mp3')
@@ -36,7 +36,7 @@ class AudioDataset(Dataset):
                 self.labels.append(path.split('/')[-4])
                 
         elif self.split == 'test':
-            dirpath = 'artist20/test_seperated'
+            dirpath = 'artist20/test_separated'
             for path in glob.glob(f'{dirpath}/*/*/*'):
                 if self.load_vocals:
                     self.audio_files.append(f'{path}/vocals.mp3')
