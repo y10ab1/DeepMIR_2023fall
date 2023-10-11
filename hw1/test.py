@@ -29,12 +29,36 @@ def main(args):
     with torch.no_grad():
         logger = tqdm(test_dataloader)
         for data, target in logger:
-            output = model(data.to(model.device))
-            predicted = torch.argsort(output.squeeze(1), dim=1, descending=True)
+            
+            # segment data(audio) into non-overlapping 5s segments
+            # e.g. data.shape = (1, 80000), segment_length = 5s, segment_length * sample_rate = 80000
+            for i in tqdm(range(data.shape[1] // (args.segment_length * args.sample_rate))):
+                # predict each segment and aggregate the results for this sample
+                start = i * args.segment_length * args.sample_rate
+                end = (i + 1) * args.segment_length * args.sample_rate
+                output = model(data[:, start:end].to(model.device))
+                if i == 0:
+                    predicted = F.softmax(output, dim=1)
+                else:
+                    predicted += F.softmax(output, dim=1)
+                
+                    
+            # get top 3 predictions for each sample in the batch
             for i in range(predicted.shape[0]):
-                df = df._append({'id': target[i], 'top1': val_dataset.get_label(predicted[i][0]), 'top2': val_dataset.get_label(predicted[i][1]), 'top3': val_dataset.get_label(predicted[i][2])}, ignore_index=True)
-                logger.set_description(f'Predicting {target[i]}, top1: {val_dataset.get_label(predicted[i][0])}, top2: {val_dataset.get_label(predicted[i][1])}, top3: {val_dataset.get_label(predicted[i][2])}')
-    
+                top3 = torch.topk(predicted, 3, dim=1)
+                
+                original_idx = test_dataset.get_label(target[i].item())
+                df = df._append({'id': original_idx, 
+                                 'top1': val_dataset.get_label(top3.indices[i][0]), 
+                                 'top2': val_dataset.get_label(top3.indices[i][1]), 
+                                 'top3': val_dataset.get_label(top3.indices[i][2])}, ignore_index=True)
+                print(f"Predicting {original_idx}, Prob. of top3: {top3.values[i]}")
+                print(val_dataset.get_label(top3.indices[i][0]), val_dataset.get_label(top3.indices[i][1]), val_dataset.get_label(top3.indices[i][2]))
+
+            
+
+            
+            
     # sort id in ascending order
     df = df.sort_values(by=['id'])
     df.to_csv(args.save_path, index=False)
@@ -55,9 +79,11 @@ if __name__ == '__main__':
     parser.add_argument('--trim_silence', type=bool, default=False, metavar='N',
                         help='trim silence (default: False)')
     parser.add_argument('--load_model', type=str, default=None, metavar='N',
-                        help='load model (default: None), e.g. ./model/model_best.pth')
+                        help='load model (default: None), e.g. ./model/models/model_best.pth')
     parser.add_argument('--save_path', type=str, default='./submission.csv', metavar='N',
                         help='save path (default: ./submission.csv)')
+    parser.add_argument('--segment_length', type=int, default=5, metavar='N',
+                        help='segment length in seconds (default: 5)')
 
     
     args = parser.parse_args()

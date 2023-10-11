@@ -26,7 +26,7 @@ def main(args):
 
     
     model = SingerClassifier(num_classes=20, linear_config=args.linear_config)
-    dataset = AudioDataset(split='train', load_vocals=True, sample_rate=16000, trim_silence=args.trim_silence, do_augment=args.do_augment)
+    dataset = AudioDataset(split='train', load_vocals=True, sample_rate=16000, trim_silence=args.trim_silence, do_augment=args.do_augment, segment_length=args.segment_length)
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers, pin_memory=True)
     
     val_dataset = AudioDataset(split='valid', load_vocals=True, sample_rate=16000, trim_silence=True, do_augment=False)
@@ -35,16 +35,19 @@ def main(args):
     optimizer = optim.AdamW(model.parameters(), lr=args.learning_rate)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=3, verbose=True, factor=0.5)
     criterion = nn.CrossEntropyLoss()
+    start_epoch = 1
     
     if args.resume is not None:
         model.load_state_dict(torch.load(args.resume)['model_state_dict'])
         optimizer.load_state_dict(torch.load(args.resume)['optimizer_state_dict'])
-        
-        print(f'Resume from {args.resume}')
+        start_epoch = torch.load(args.resume)['epoch']
+        prev_acc = torch.load(args.resume)['val_acc']
+        print(f'Resume from {args.resume}, start_epoch: {start_epoch}, prev_acc: {prev_acc}')
     
     model.train()
     
-    for epoch in range(1, args.epochs + 1):
+    for epoch in range(start_epoch, start_epoch + args.epochs):
+        
         logger = tqdm(dataloader)
         for batch_idx, (data, target) in enumerate(logger):
             optimizer.zero_grad()
@@ -77,6 +80,8 @@ def main(args):
                 'model_state_dict': model.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
                 'val_loss': val_loss,
+                'val_acc': accuracy,
+                'epoch': epoch,
             }, f'{model_save_dir}/model_{epoch}.pth')
         
         # Save best model
@@ -87,20 +92,22 @@ def main(args):
                 'model_state_dict': model.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
                 'val_loss': val_loss,
+                'val_acc': accuracy,
+                'epoch': epoch,
             }, f'{model_save_dir}/model_best.pth')
             print(f'Save best model with accuracy: {best_acc}')
             
     writer.close()
 
-def validate(model, dataloader, device):
+def validate(model, target_dataloader, device):
     model.eval()
     correct = 0
     total = 0
     loss = float('inf')
     with torch.no_grad():
-        for data, target in tqdm(dataloader):
+        for data, target in tqdm(target_dataloader):
             output = model(data.to(device))
-            predicted = torch.argmax(output.squeeze(1), dim=1)
+            predicted = torch.argmax(output.squeeze(1), dim=1) 
             total += target.size(0)
             correct += (predicted == target.to(device)).sum().item()
             loss = min(loss, F.cross_entropy(output.squeeze(1), target.to(device)).item())
@@ -139,5 +146,7 @@ if __name__ == '__main__':
                         help='save directory (default: ./model)')
     parser.add_argument('--linear_config', type=int, default=[512], metavar='N', nargs='+',
                         help='linear config (default: [512])')
+    parser.add_argument('--segment_length', type=int, default=5, metavar='N',
+                        help='segment length for training (default: 5s), if 0, use full length')
     args = parser.parse_args()
     main(args)

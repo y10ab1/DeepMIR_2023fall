@@ -23,23 +23,14 @@ class SingerClassifier(nn.Module):
             in_features = out_features  # update in_features for the next layer
 
         layers.append(nn.Linear(in_features, num_classes))  # final layer
-        self.linear = nn.Sequential(*layers).to(self.device)
-        
-        # self.linear = nn.Sequential(
-        #     nn.Flatten(1),  # Add this line to flatten the data
-        #     nn.Linear(192, num_features),
-        #     nn.BatchNorm1d(num_features),
-        #     nn.ReLU(),
-        #     nn.Linear(num_features, num_classes)
-        # ).to(self.device)
-
-            
+        self.linear = nn.Sequential(*layers).to(self.device)            
 
     def forward(self, x):
         with torch.no_grad():
             x = self.pretrained_model.encode_batch(x.to(self.device)) # get embedding, shape: (batch_size, embedding_size)
         x = self.linear(x)
         return x
+
 
 # unit test
 if __name__ == '__main__':

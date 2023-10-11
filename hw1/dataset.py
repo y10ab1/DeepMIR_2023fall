@@ -4,7 +4,7 @@ import glob
 from torch.utils.data import Dataset
 
 class AudioDataset(Dataset):
-    def __init__(self, split='train', load_vocals=True, sample_rate=16000, trim_silence=True, do_augment=True):
+    def __init__(self, split='train', load_vocals=True, sample_rate=16000, trim_silence=True, do_augment=True, segment_length=5):
         assert split in ['train', 'valid', 'test'], f'Invalid split: {split}, must be one of [train, valid, test]'
         
         self.split = split
@@ -12,6 +12,7 @@ class AudioDataset(Dataset):
         self.sample_rate = sample_rate
         self.trim_silence = trim_silence
         self.do_augment = do_augment
+        self.segment_length = segment_length
         
         self.audio_files = []
         self.labels = []
@@ -47,6 +48,7 @@ class AudioDataset(Dataset):
         self.label_encoder = {label: i for i, label in enumerate(sorted(set(self.labels)))}
         self.label_decoder = {v: k for k, v in self.label_encoder.items()}
         print(f'Classes: {self.label_encoder}')
+        
     def __len__(self):
         return len(self.audio_files)
 
@@ -65,11 +67,17 @@ class AudioDataset(Dataset):
         # apply voice activity detection (VAD) to trim silence
         if self.trim_silence:
             signal = torchaudio.functional.vad(signal, sample_rate=self.sample_rate)
+    
         
-        # randomly sample 5 seconds for training
-        if self.split == 'train' and signal.shape[1] > self.sample_rate * 5:
-            start = torch.randint(0, signal.shape[1] - self.sample_rate * 5, (1,)).item()
-            signal = signal[:, start:start + self.sample_rate * 5]
+        # randomly sample segment_length seconds
+        if self.segment_length > 0 and self.split == 'train':
+            assert signal.shape[1] > self.sample_rate * self.segment_length, \
+                f'Audio signal is too short: {signal.shape[1] / self.sample_rate} < {self.segment_length}'
+            
+            start = torch.randint(0, signal.shape[1] - self.sample_rate * self.segment_length, (1,)).item()
+            signal = signal[:, start:start + self.sample_rate * self.segment_length]
+
+            
             
         # augmentations
         if self.split == 'train' and self.do_augment:
