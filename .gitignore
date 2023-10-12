@@ -11,6 +11,7 @@ separated/
 model/
 model*/
 cloud*
+data/
 
 # C extensions
 *.so

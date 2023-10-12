@@ -131,7 +131,7 @@ if __name__ == '__main__':
     parser.add_argument('--trim_silence', type=bool, default=False, metavar='N',
                         help='trim silence (default: False)')
     parser.add_argument('--load_model', type=str, default=None, metavar='N',
-                        help='load model (default: None), e.g. ./model_new/models/model_best.pth')
+                        help='load model (default: None), e.g. ./model/models/model_best.pth')
     parser.add_argument('--save_path', type=str, default='./submission.csv', metavar='N',
                         help='save path (default: ./submission.csv)')
     parser.add_argument('--segment_length', type=int, default=5, metavar='N',
