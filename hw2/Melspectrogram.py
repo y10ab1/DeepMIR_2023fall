@@ -37,8 +37,8 @@ def load_audio(audio_path, sr=None, mono=True):
     return audio
 
 if __name__ == '__main__':
-    load_audio_path = '/path/to/your/audio/dir'
-    save_npy_path = '/path/you/want/to/save/mel_npy'
+    load_audio_path = 'data/m4singer_valid/Alto-3#不为谁而作的歌'
+    save_npy_path = 'mel_npy'
     if not os.path.exists(save_npy_path):
         os.mkdir(save_npy_path)
     audio_list = os.listdir(load_audio_path)

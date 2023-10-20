@@ -127,7 +127,7 @@ def main():
     a = parser.parse_args()
 
     gt_dir = '/path/to/m4singer_valid'
-    synth_dir = '/path/to/your/vocoder_output_dir'+a.model
+    synth_dir = '/home/yuehpo/coding/DeepMIR_2023fall/hw2/output'+a.model
 
     results = evaluate(gt_dir, synth_dir)
     print(results)
