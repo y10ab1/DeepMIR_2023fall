@@ -12,7 +12,7 @@ model/
 model*/
 cloud*
 data/
-
+hifi-gan/
 # C extensions
 *.so
 
