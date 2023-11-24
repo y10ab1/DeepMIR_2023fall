@@ -3,6 +3,7 @@ import torch
 import torchaudio
 import librosa
 import os
+from glob import glob
 
 num_mels=80
 n_fft=1024
@@ -37,11 +38,12 @@ def load_audio(audio_path, sr=None, mono=True):
     return audio
 
 if __name__ == '__main__':
-    load_audio_path = 'data/m4singer_valid/Alto-3#不为谁而作的歌'
+    load_audio_path = '/home/yuehpo/coding/DeepMIR_2023fall/hw2/data/m4singer/Alto-1#小幸运'
     save_npy_path = 'mel_npy'
     if not os.path.exists(save_npy_path):
         os.mkdir(save_npy_path)
-    audio_list = os.listdir(load_audio_path)
+    # audio_list = os.listdir(load_audio_path)
+    audio_list = glob(os.path.join(load_audio_path, '*.wav'))
     audio_list.sort()
     for audio in audio_list:
         y = load_audio(os.path.join(load_audio_path, audio), sr=sampling_rate)

@@ -77,7 +77,9 @@ def evaluate(gt_dir, synth_dir):
             ###############
             # you can modify this line to find the Corresponding answer audio
             # for example, the wav_path is Alto-1#newboy_0004.wav
-            y_path = os.path.join(gt_dir, wav_path.split('_')[0]+'/'+wav_path.split('_')[1])
+
+            # y_path = os.path.join(gt_dir, wav_path.split('_')[0]+'/'+wav_path.split('_')[1])
+            y_path = os.path.join(gt_dir, wav_path)
             ###############
             y_g_hat_path = os.path.join(synth_dir, wav_path)
             y_path_list.append(y_path)
@@ -126,8 +128,8 @@ def main():
     parser.add_argument('--model', default=None)
     a = parser.parse_args()
 
-    gt_dir = '/path/to/m4singer_valid'
-    synth_dir = '/home/yuehpo/coding/DeepMIR_2023fall/hw2/output'+a.model
+    gt_dir = '/home/yuehpo/coding/DeepMIR_2023fall/hw2/data/m4singer_22.5k_symbolic'
+    synth_dir = '/home/yuehpo/coding/DeepMIR_2023fall/hw2/data/output/valid/'+a.model
 
     results = evaluate(gt_dir, synth_dir)
     print(results)
