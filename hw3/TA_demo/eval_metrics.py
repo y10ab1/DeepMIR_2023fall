@@ -11,7 +11,7 @@ from tqdm import tqdm
 import argparse
 from miditoolkit import MidiFile
 
-from musdr.side_utils import (
+from side_utils import (
 #   get_event_seq, 
   get_bars_crop, 
   get_pitch_histogram, 
@@ -35,7 +35,8 @@ def parse_opt():
     parser = argparse.ArgumentParser()
     # training opts
     parser.add_argument('--dict_path', type=str,
-                        help='the dictionary path', required=True)
+                        help='the dictionary path', 
+                        default='/home/yuehpo/coding/DeepMIR_2023fall/hw3/TA_demo/basic_event_dictionary.pkl')
     parser.add_argument('--output_file_path', type=str,
                         help='the output file path.', required=True)
     args = parser.parse_args()
@@ -45,11 +46,13 @@ opt = parse_opt()
 
 
 event2word, word2event = pickle.load(open(opt.dict_path, 'rb'))
-
-
+print(f"event2word: {event2word})")
+# exit()
 def extract_events(input_path):
     note_items, tempo_items = utils.read_items(input_path)
     note_items = utils.quantize_items(note_items)
+    # print(f"note_items: {note_items}, tempo_items: {tempo_items}")
+    
     max_time = note_items[-1].end
 
     items = tempo_items + note_items
@@ -61,24 +64,33 @@ def extract_events(input_path):
 def prepare_data(midi_path):
     # extract events
     events = extract_events(midi_path)
+    print(f"events: {np.unique([e.name for e in events], return_counts=True)}")
+    # exit()
     # event to word
     words = []
     for event in events:
         e = '{}_{}'.format(event.name, event.value)
+        # e = e.replace(' ', '_')
         if e in event2word:
             words.append(event2word[e])
         else:
             # OOV
+            # print(f"event name: {event.name}, event value: {event.value}")
             if event.name == 'Note Velocity':
                 # replace with max velocity based on our training data
-                words.append(event2word['Note Velocity_21'])
+                words.append(event2word['Note Velocity_86'])
+                pass
+            # elif event.name == 'Tempo Value':
+            #     words.append(event2word[e.replace("_Value", "")])
+            # elif event.name == 'Note On':
+            #     words.append(event2word[e.replace("_On", "_Pitch")])
             else:
                 # something is wrong
                 # you should handle it for your own purpose
                 print('something is wrong! {}'.format(e))
     return words
 
-def compute_piece_pitch_entropy(piece_ev_seq, window_size, bar_ev_id=BAR_EV, pitch_evs=PITCH_EVS, verbose=False):
+def compute_piece_pitch_entropy(piece_ev_seq, window_size, bar_ev_id=BAR_EV, pitch_evs=PITCH_EVS, verbose=True):
   '''
   Computes the average pitch-class histogram entropy of a piece.
   (Metric ``H``)
@@ -106,7 +118,6 @@ def compute_piece_pitch_entropy(piece_ev_seq, window_size, bar_ev_id=BAR_EV, pit
   pitch_ents = []
   for st_bar in range(0, n_bars - window_size + 1):
     seg_ev_seq = get_bars_crop(piece_ev_seq, st_bar, st_bar + window_size - 1, bar_ev_id)
-
     pitch_hist = get_pitch_histogram(seg_ev_seq, pitch_evs=pitch_evs)
     if pitch_hist is None:
       if verbose:
@@ -178,7 +189,7 @@ if __name__ == "__main__":
       result_dict['H4'].append(h4)
       gs = compute_piece_groove_similarity(seq)
       result_dict['GS'].append(gs)
-
+      print(f"piece: {p}, H1: {h1}, H4: {h4}, GS: {gs}")
   if len(result_dict):
       df = pd.DataFrame.from_dict(result_dict)
       df.to_csv('pop1k7.csv', index=False, encoding='utf-8')

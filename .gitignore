@@ -14,6 +14,7 @@ cloud*
 data/
 hifi-gan/
 Compound-Word-Transformer/
+MusDr/
 # C extensions
 *.so
 

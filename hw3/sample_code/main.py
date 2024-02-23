@@ -221,7 +221,7 @@ def train(is_continue = False, checkpoints_path = ''):
 
     # create data list
     # use glob to get all midi file path
-    train_list = glob.glob('/home/Lonian/nas_189/home/datasets/ailabs_1k7/analized/*.mid')
+    train_list = glob.glob('/home/yuehpo/coding/DeepMIR_2023fall/hw3/Compound-Word-Transformer/dataset/midi_analyzed/*.mid')
     print('train list len =', len(train_list))
 
     # dataset
@@ -292,7 +292,7 @@ def main():
     ######################################
     # write your main function here
     ######################################
-    return
+    train()
 
 if __name__ == '__main__':
     main()
